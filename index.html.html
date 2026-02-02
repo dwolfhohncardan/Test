@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Material-Check Pro - Josef Hohn GmbH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            -webkit-tap-highlight-color: transparent; 
+            touch-action: manipulation;
+            background-color: #262626;
+        }
+        /* Aktiver Zustand: Kompakt & Orange */
+        .machine-card.active { 
+            border-color: #ff9800; 
+            background-color: #404040; 
+        }
+        .machine-card.active .status-dot {
+            background-color: #ff9800;
+            box-shadow: 0 0 5px #ff9800;
+        }
+        .hohn-orange { color: #ff9800; }
+        .hohn-bg-orange { background-color: #ff9800; }
+    </style>
+</head>
+<body class="p-3 font-sans select-none text-white">
+
+    <header class="mb-4 pt-2 text-center">
+        <h1 class="text-2xl font-bold tracking-tight mb-0">Josef Hohn GmbH</h1>
+        <p class="text-[10px] font-bold uppercase tracking-[0.2em] hohn-orange">Material-Anforderung</p>
+    </header>
+
+    <div id="machineGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-32">
+        <script>
+            const machines = [
+                "Grob 2", "Integrex", "Nexus", "Smart", 
+                "Roboterlinie Drehen", "Roboterlinie Bohren", 
+                "Ergo 260CL", "Axisco", "Karl Klink", 
+                "Padovani 3", "Magdeburg", "DMC 60 (H)", 
+                "Zentriermaschine", "Pronto 1", "Pronto 3", 
+                "Pronto 4", "Pronto 5"
+            ];
+
+            const grid = document.getElementById('machineGrid');
+            machines.forEach(name => {
+                const btn = document.createElement('button');
+                btn.onclick = (e) => toggleMachine(name, btn);
+                // Kompakteres Design: Weniger Padding (p-3), keine Mindesthöhe
+                btn.className = "machine-card bg-[#333333] p-3 rounded-lg shadow border border-transparent text-left transition-all active:scale-95 flex flex-col justify-between overflow-hidden";
+                btn.innerHTML = `
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <div class="status-dot w-2 h-2 rounded-full bg-gray-500 transition-colors"></div>
+                        <span class="status-label text-[8px] uppercase font-bold text-gray-400">Bereit</span>
+                    </div>
+                    <span class="text-sm font-bold text-white leading-tight uppercase truncate">${name}</span>
+                `;
+                grid.appendChild(btn);
+            });
+        </script>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 p-3 bg-[#262626]/95 backdrop-blur-sm border-t border-white/5 shadow-2xl">
+        <form action="https://formspree.io/f/xpqryvel" method="POST" id="materialForm">
+            <input type="hidden" name="Bedarf_an_Maschinen" id="selectedMachinesInput">
+            <button type="submit" id="submitBtn" disabled class="w-full bg-[#3d3d3d] text-gray-500 font-bold py-4 rounded-md transition-all text-lg uppercase tracking-widest disabled:opacity-50 shadow-inner">
+                SENDEN (0)
+            </button>
+        </form>
+    </div>
+
+    <script>
+        let selectedMachines = new Set();
+
+        function toggleMachine(name, btn) {
+            const statusLabel = btn.querySelector('.status-label');
+
+            if (selectedMachines.has(name)) {
+                selectedMachines.delete(name);
+                btn.classList.remove('active');
+                statusLabel.innerText = "Bereit";
+                statusLabel.classList.replace('hohn-orange', 'text-gray-400');
+            } else {
+                selectedMachines.add(name);
+                btn.classList.add('active');
+                statusLabel.innerText = "Bedarf";
+                statusLabel.classList.replace('text-gray-400', 'hohn-orange');
+            }
+
+            updateUI();
+        }
+
+        function updateUI() {
+            const btn = document.getElementById('submitBtn');
+            const input = document.getElementById('selectedMachinesInput');
+            
+            input.value = Array.from(selectedMachines).join(', ');
+            btn.innerText = `SENDEN (${selectedMachines.size})`;
+            
+            if (selectedMachines.size > 0) {
+                btn.disabled = false;
+                btn.classList.remove('bg-[#3d3d3d]', 'text-gray-500');
+                btn.classList.add('hohn-bg-orange', 'text-white');
+            } else {
+                btn.disabled = true;
+                btn.classList.remove('hohn-bg-orange', 'text-white');
+                btn.classList.add('bg-[#3d3d3d]', 'text-gray-500');
+            }
+        }
+    </script>
+</body>
+</html>
