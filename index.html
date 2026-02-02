@@ -19,32 +19,49 @@
             overflow: hidden;
         }
 
-        /* Kompakterer Header */
-        header { text-align: center; padding: 10px 5px; flex-shrink: 0; }
-        header h1 { margin: 0; font-size: 1.2rem; }
-        header p { margin: 2px 0 0; color: var(--orange); font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; font-weight: bold; }
+        header { 
+            text-align: center; 
+            padding: 10px; 
+            flex-shrink: 0; 
+            position: relative;
+            border-bottom: 1px solid #333;
+        }
 
-        /* Scroll-Bereich flexibel */
+        /* Umschalt-Button oben rechts */
+        #viewToggle {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: #444;
+            border: 1px solid var(--orange);
+            color: var(--orange);
+            font-size: 10px;
+            padding: 5px 8px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- HORIZONTALE ANSICHT (TABLET) --- */
         .scroll-container {
             display: flex;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
-            padding: 10px 0;
-            gap: 12px;
+            padding: 20px 0;
+            gap: 15px;
             flex-grow: 1;
             align-items: center;
         }
         .scroll-container::-webkit-scrollbar { display: none; }
         .spacer { flex: 0 0 10%; }
 
-        /* Kompakterer Karten-Stil */
         .machine-card {
-            flex: 0 0 75%;
-            height: 60vh; /* Nutzt 60% der verfügbaren Displayhöhe */
-            max-height: 280px;
+            flex: 0 0 80%;
+            height: 250px;
             background-color: var(--card);
-            border-radius: 12px;
-            border: 3px solid transparent;
+            border-radius: 15px;
+            border: 4px solid transparent;
             scroll-snap-align: center;
             display: flex;
             flex-direction: column;
@@ -53,68 +70,70 @@
             transition: all 0.2s ease;
         }
 
-        .machine-card.active { border-color: var(--orange); background-color: #3d3d3d; }
-
-        .status-dot { width: 10px; height: 10px; background: #555; border-radius: 50%; margin-bottom: 8px; }
-        .machine-card.active .status-dot { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
-        
-        .card-label { font-size: 0.65rem; color: #888; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
-        .machine-name { 
-            font-size: 1.5rem; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            text-align: center; 
-            padding: 0 15px; 
-            line-height: 1.1;
-            word-wrap: break-word;
+        /* --- VERTIKALE ANSICHT (HANDY/MOBILE) --- */
+        body.mobile-mode .scroll-container {
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-snap-type: y mandatory;
+            display: block;
+            padding: 10px;
         }
-
-        /* Footer flacher */
-        footer { padding: 12px 20px 20px; background: var(--dark); border-top: 1px solid #333; flex-shrink: 0; }
-        #submitBtn {
+        body.mobile-mode .machine-card {
+            flex: none;
             width: 100%;
-            padding: 16px;
-            border-radius: 10px;
-            border: none;
-            background-color: #444;
-            color: #777;
-            font-size: 1rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            transition: 0.2s;
+            height: 80px;
+            margin-bottom: 10px;
+            flex-direction: row;
+            justify-content: flex-start;
+            padding: 0 20px;
+            scroll-snap-align: start;
         }
-        #submitBtn.active { background-color: var(--orange); color: white; box-shadow: 0 4px 15px rgba(255,152,0,0.3); }
-        
-        /* Versionsanzeige zur Kontrolle */
-        .version { position: fixed; bottom: 2px; right: 5px; font-size: 8px; color: #444; }
+        body.mobile-mode .spacer { display: none; }
+        body.mobile-mode .machine-name { font-size: 1.2rem; margin-left: 15px; text-align: left; }
+        body.mobile-mode .status-dot { margin-bottom: 0; }
+        body.mobile-mode .card-label { display: none; }
+
+        /* GEMEINSAME STYLES */
+        .machine-card.active { border-color: var(--orange); background-color: #444; }
+        .status-dot { width: 12px; height: 12px; background: #666; border-radius: 50%; }
+        .machine-card.active .status-dot { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+        .card-label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .machine-name { font-size: 24px; font-weight: 900; text-transform: uppercase; }
+
+        footer { padding: 15px; background: var(--dark); border-top: 1px solid #444; }
+        #submitBtn {
+            width: 100%; padding: 18px; border-radius: 12px; border: none;
+            background-color: #444; color: #777; font-size: 16px; font-weight: bold;
+            text-transform: uppercase; transition: 0.3s;
+        }
+        #submitBtn.active { background-color: var(--orange); color: white; }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
     <header>
-        <h1>Josef Hohn GmbH</h1>
-        <p>Material-Anforderung</p>
+        <button id="viewToggle" onclick="toggleView()">Ansicht</button>
+        <h1 style="font-size: 1.2rem; margin: 0;">Josef Hohn GmbH</h1>
+        <p style="color: var(--orange); font-size: 9px; margin: 0; letter-spacing: 1px; font-weight: bold;">MATERIAL-ANFORDERUNG</p>
     </header>
 
     <div class="scroll-container" id="scroller">
         <div class="spacer"></div>
-        <div class="machine-card" onclick="select(this, 'Grob 2')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Grob 2</div></div>
-        <div class="machine-card" onclick="select(this, 'Integrex')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Integrex</div></div>
-        <div class="machine-card" onclick="select(this, 'Nexus')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Nexus</div></div>
-        <div class="machine-card" onclick="select(this, 'Smart')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Smart</div></div>
-        <div class="machine-card" onclick="select(this, 'Roboterlinie Drehen')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Roboterlinie Drehen</div></div>
-        <div class="machine-card" onclick="select(this, 'Roboterlinie Bohren')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Roboterlinie Bohren</div></div>
-        <div class="machine-card" onclick="select(this, 'Ergo 260CL')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Ergo 260CL</div></div>
-        <div class="machine-card" onclick="select(this, 'Axisco')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Axisco</div></div>
-        <div class="machine-card" onclick="select(this, 'Karl Klink')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Karl Klink</div></div>
-        <div class="machine-card" onclick="select(this, 'Padovani 3')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Padovani 3</div></div>
-        <div class="machine-card" onclick="select(this, 'Magdeburg')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Magdeburg</div></div>
-        <div class="machine-card" onclick="select(this, 'DMC 60 (H)')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">DMC 60 (H)</div></div>
-        <div class="machine-card" onclick="select(this, 'Zentriermaschine')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Zentriermaschine</div></div>
-        <div class="machine-card" onclick="select(this, 'Pronto 1')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Pronto 1</div></div>
-        <div class="machine-card" onclick="select(this, 'Pronto 3')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Pronto 3</div></div>
-        <div class="machine-card" onclick="select(this, 'Pronto 4')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Pronto 4</div></div>
-        <div class="machine-card" onclick="select(this, 'Pronto 5')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Pronto 5</div></div>
+        
+        <script>
+            const machines = ["Grob 2", "Integrex", "Nexus", "Smart", "Roboterlinie Drehen", "Roboterlinie Bohren", "Ergo 260CL", "Axisco", "Karl Klink", "Padovani 3", "Magdeburg", "DMC 60 (H)", "Zentriermaschine", "Pronto 1", "Pronto 3", "Pronto 4", "Pronto 5"];
+            
+            const scroller = document.getElementById('scroller');
+            machines.forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'machine-card';
+                div.onclick = function() { select(this, name); };
+                div.innerHTML = `<div class="status-dot"></div><div style="display:flex; flex-direction:column; align-items:center;"><div class="card-label">Bereit</div><div class="machine-name">${name}</div></div>`;
+                scroller.appendChild(div);
+            });
+        </script>
+
         <div class="spacer"></div>
     </div>
 
@@ -125,33 +144,45 @@
         </form>
     </footer>
 
-    <div class="version">v1.2 - Kompakt</div>
-
     <script>
         let currentMachine = "";
 
+        // Umschalten zwischen Tablet (Wischen) und Handy (Liste)
+        function toggleView() {
+            document.getElementById('mainBody').classList.toggle('mobile-mode');
+            const btn = document.getElementById('viewToggle');
+            btn.innerText = document.getElementById('mainBody').classList.contains('mobile-mode') ? "Tablet" : "Handy";
+        }
+
         function select(el, name) {
-            const cards = document.querySelectorAll('.machine-card');
-            cards.forEach(c => {
+            document.querySelectorAll('.machine-card').forEach(c => {
                 c.classList.remove('active');
                 c.querySelector('.card-label').innerText = "Bereit";
             });
 
             if (currentMachine === name) {
                 currentMachine = "";
-                const btn = document.getElementById('submitBtn');
-                btn.disabled = true;
-                btn.classList.remove('active');
-                btn.innerText = "Senden";
+                updateButton(false, "");
             } else {
                 currentMachine = name;
                 el.classList.add('active');
                 el.querySelector('.card-label').innerText = "Gewählt";
-                document.getElementById('machineInput').value = name;
-                const btn = document.getElementById('submitBtn');
+                updateButton(true, name);
+            }
+        }
+
+        function updateButton(active, name) {
+            const btn = document.getElementById('submitBtn');
+            const input = document.getElementById('machineInput');
+            if(active) {
+                input.value = name;
                 btn.disabled = false;
                 btn.classList.add('active');
                 btn.innerText = "Anfordern: " + name;
+            } else {
+                btn.disabled = true;
+                btn.classList.remove('active');
+                btn.innerText = "Senden";
             }
         }
     </script>
