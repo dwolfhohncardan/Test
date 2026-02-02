@@ -4,144 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Material-Check Hohn</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* FARBEN & BASIS */
+        :root { --orange: #ff9800; --dark: #262626; --card: #333333; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
-            background-color: #262626; 
+            background-color: var(--dark); 
+            color: white; 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
             height: 100vh; 
             overflow: hidden; 
-            font-family: sans-serif;
-            color: white;
+            display: flex; 
+            flex-direction: column;
         }
-        /* Das "Karussell" ohne Absturzgefahr */
+
+        header { text-align: center; padding: 20px 10px; }
+        header h1 { margin: 0; font-size: 24px; }
+        header p { margin: 5px 0 0; color: var(--orange); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; }
+
+        /* SCROLL-BEREICH */
         .scroll-container {
             display: flex;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
             padding: 20px 0;
-            gap: 20px;
+            gap: 15px;
+            flex-grow: 1;
+            align-items: center;
         }
-        /* Versteckt die Scrollbar */
         .scroll-container::-webkit-scrollbar { display: none; }
+        
+        /* Die Platzhalter am Rand zum Zentrieren */
+        .spacer { flex: 0 0 10%; }
 
+        /* MASCHINEN-KARTE */
         .machine-card {
-            flex: 0 0 85%; /* Karte nimmt 85% der Breite ein */
-            height: 250px;
-            scroll-snap-align: center;
-            background-color: #333;
-            border-radius: 20px;
+            flex: 0 0 80%;
+            height: 220px;
+            background-color: var(--card);
+            border-radius: 15px;
             border: 4px solid transparent;
+            scroll-snap-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
 
-        .machine-card.active {
-            border-color: #ff9800;
+        .machine-card.active { border-color: var(--orange); background-color: #444; }
+
+        .status-dot { width: 12px; height: 12px; background: #666; border-radius: 50%; margin-bottom: 10px; }
+        .machine-card.active .status-dot { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+        
+        .card-label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 10px; font-weight: bold; }
+        .machine-name { font-size: 28px; font-weight: 900; text-transform: uppercase; text-align: center; padding: 0 10px; }
+
+        /* FOOTER & BUTTON */
+        footer { padding: 20px; background: var(--dark); border-top: 1px solid #444; }
+        #submitBtn {
+            width: 100%;
+            padding: 20px;
+            border-radius: 12px;
+            border: none;
             background-color: #444;
+            color: #777;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
         }
-
-        .status-dot {
-            width: 14px; height: 14px; border-radius: 50%;
-            background-color: #666; margin-bottom: 12px;
-        }
-        .active .status-dot { 
-            background-color: #ff9800; 
-            box-shadow: 0 0 10px #ff9800; 
-        }
-
-        .hohn-orange { color: #ff9800; }
-        .hohn-bg-orange { background-color: #ff9800 !important; }
+        #submitBtn.active { background-color: var(--orange); color: white; cursor: pointer; }
+        #submitBtn:disabled { opacity: 0.5; }
     </style>
 </head>
-<body class="p-4">
+<body>
 
-    <header class="text-center mb-4">
-        <h1 class="text-2xl font-bold">Josef Hohn GmbH</h1>
-        <p class="text-xs uppercase tracking-widest hohn-orange font-bold">Material-Anforderung</p>
+    <header>
+        <h1>Josef Hohn GmbH</h1>
+        <p>Material-Anforderung</p>
     </header>
 
-    <div class="scroll-container" id="container">
-        </div>
+    <div class="scroll-container" id="scroller">
+        <div class="spacer"></div>
+        
+        <div class="machine-card" onclick="select(this, 'Grob 2')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Grob 2</div></div>
+        <div class="machine-card" onclick="select(this, 'Integrex')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Integrex</div></div>
+        <div class="machine-card" onclick="select(this, 'Nexus')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Nexus</div></div>
+        <div class="machine-card" onclick="select(this, 'Smart')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Smart</div></div>
+        <div class="machine-card" onclick="select(this, 'Roboterlinie Drehen')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Roboterlinie Drehen</div></div>
+        <div class="machine-card" onclick="select(this, 'Roboterlinie Bohren')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Roboterlinie Bohren</div></div>
+        <div class="machine-card" onclick="select(this, 'Ergo 260CL')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Ergo 260CL</div></div>
+        <div class="machine-card" onclick="select(this, 'Axisco')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Axisco</div></div>
+        <div class="machine-card" onclick="select(this, 'Karl Klink')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Karl Klink</div></div>
+        <div class="machine-card" onclick="select(this, 'Padovani 3')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Padovani 3</div></div>
+        <div class="machine-card" onclick="select(this, 'Magdeburg')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Magdeburg</div></div>
+        <div class="machine-card" onclick="select(this, 'DMC 60 (H)')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">DMC 60 (H)</div></div>
+        <div class="machine-card" onclick="select(this, 'Zentriermaschine')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Zentriermaschine</div></div>
+        <div class="machine-card" onclick="select(this, 'Pronto 1')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Pronto 1</div></div>
+        <div class="machine-card" onclick="select(this, 'Pronto 3')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Pronto 3</div></div>
+        <div class="machine-card" onclick="select(this, 'Pronto 4')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Pronto 4</div></div>
+        <div class="machine-card" onclick="select(this, 'Pronto 5')"><div class="status-dot"></div><div class="card-label">Bereit</div><div class="machine-name">Pronto 5</div></div>
 
-    <div class="text-center text-gray-500 text-xs mt-2 italic">
-        ← Wischen zum Wechseln →
+        <div class="spacer"></div>
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 p-6 bg-[#262626] border-t border-gray-800">
-        <form action="https://formspree.io/f/xpqryvel" method="POST" id="materialForm">
-            <input type="hidden" name="Maschine" id="selectedInput">
-            <button type="submit" id="submitBtn" disabled 
-                class="w-full bg-gray-800 text-gray-600 font-bold py-5 rounded-2xl text-xl uppercase transition-all opacity-50">
-                Senden
-            </button>
+    <footer>
+        <form action="https://formspree.io/f/xpqryvel" method="POST">
+            <input type="hidden" name="Gewaehlte_Maschine" id="machineInput">
+            <button type="submit" id="submitBtn" disabled>Senden</button>
         </form>
-    </div>
+    </footer>
 
     <script>
-        const machines = ["Grob 2", "Integrex", "Nexus", "Smart", "Roboterlinie Drehen", "Roboterlinie Bohren", "Ergo 260CL", "Axisco", "Karl Klink", "Padovani 3", "Magdeburg", "DMC 60 (H)", "Zentriermaschine", "Pronto 1", "Pronto 3", "Pronto 4", "Pronto 5"];
-        
-        let currentSelection = null;
-        const container = document.getElementById('container');
+        let currentMachine = "";
 
-        machines.forEach(name => {
-            const card = document.createElement('div');
-            card.className = "machine-card";
-            card.innerHTML = `
-                <div class="status-dot"></div>
-                <span class="status-text text-[10px] text-gray-500 uppercase font-bold mb-2">Bereit</span>
-                <span class="text-4xl font-black uppercase text-center px-4">${name}</span>
-            `;
-            
-            card.onclick = () => {
-                // Alle Karten zurücksetzen
-                document.querySelectorAll('.machine-card').forEach(c => {
-                    c.classList.remove('active');
-                    c.querySelector('.status-text').innerText = "Bereit";
-                    c.querySelector('.status-text').style.color = "#6b7280";
-                });
+        function select(el, name) {
+            // Alle Karten deaktivieren
+            const cards = document.querySelectorAll('.machine-card');
+            cards.forEach(c => {
+                c.classList.remove('active');
+                c.querySelector('.card-label').innerText = "Bereit";
+            });
 
-                if (currentSelection === name) {
-                    currentSelection = null;
-                } else {
-                    currentSelection = name;
-                    card.classList.add('active');
-                    card.querySelector('.status-text').innerText = "Ausgewählt";
-                    card.querySelector('.status-text').style.color = "#ff9800";
-                }
-                updateUI();
-            };
-            container.appendChild(card);
-        });
-
-        // Platzhalter-Elemente am Anfang und Ende für besseres Zentrieren
-        const spacerStart = document.createElement('div');
-        spacerStart.style.flex = "0 0 7.5%";
-        container.prepend(spacerStart);
-        const spacerEnd = document.createElement('div');
-        spacerEnd.style.flex = "0 0 7.5%";
-        container.appendChild(spacerEnd);
-
-        function updateUI() {
-            const btn = document.getElementById('submitBtn');
-            const input = document.getElementById('selectedInput');
-            
-            if (currentSelection) {
-                input.value = currentSelection;
-                btn.disabled = false;
-                btn.classList.add('hohn-bg-orange', 'text-white', 'opacity-100');
-                btn.classList.remove('bg-gray-800', 'text-gray-600', 'opacity-50');
-                btn.innerText = `SENDEN: ${currentSelection}`;
+            // Wenn man auf die gleiche klickt: abwählen
+            if (currentMachine === name) {
+                currentMachine = "";
+                document.getElementById('submitBtn').disabled = true;
+                document.getElementById('submitBtn').classList.remove('active');
+                document.getElementById('submitBtn').innerText = "Senden";
             } else {
-                input.value = "";
-                btn.disabled = true;
-                btn.classList.remove('hohn-bg-orange', 'text-white', 'opacity-100');
-                btn.classList.add('bg-gray-800', 'text-gray-600', 'opacity-50');
-                btn.innerText = "Senden";
+                // Neue auswählen
+                currentMachine = name;
+                el.classList.add('active');
+                el.querySelector('.card-label').innerText = "Ausgewählt";
+                document.getElementById('machineInput').value = name;
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').classList.add('active');
+                document.getElementById('submitBtn').innerText = "Anfordern: " + name;
             }
         }
     </script>
