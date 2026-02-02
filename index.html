@@ -3,22 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Material-Check Pro</title>
+    <title>Material-Check Hohn</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
         body { 
-            background-color: #262626;
-            height: 100vh;
-            overflow: hidden;
+            background-color: #262626; 
+            height: 100vh; 
+            overflow: hidden; 
             font-family: sans-serif;
+            color: white;
         }
-        .hohn-orange { color: #ff9800; }
-        .hohn-bg-orange { background-color: #ff9800 !important; }
-        
+        /* Das "Karussell" ohne Absturzgefahr */
+        .scroll-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px 0;
+            gap: 20px;
+        }
+        /* Versteckt die Scrollbar */
+        .scroll-container::-webkit-scrollbar { display: none; }
+
         .machine-card {
-            width: 85%;
-            height: 220px;
+            flex: 0 0 85%; /* Karte nimmt 85% der Breite ein */
+            height: 250px;
+            scroll-snap-align: center;
             background-color: #333;
             border-radius: 20px;
             border: 4px solid transparent;
@@ -26,109 +37,94 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            margin: auto;
+            transition: all 0.2s;
         }
 
-        /* Effekt für die einzige ausgewählte Maschine */
         .machine-card.active {
             border-color: #ff9800;
             background-color: #444;
-            transform: scale(1.02);
-            box-shadow: 0 0 25px rgba(255, 152, 0, 0.2);
         }
 
         .status-dot {
-            width: 12px; height: 12px; border-radius: 50%;
-            background-color: #666; margin-bottom: 10px;
-            transition: all 0.3s;
+            width: 14px; height: 14px; border-radius: 50%;
+            background-color: #666; margin-bottom: 12px;
         }
-
         .active .status-dot { 
             background-color: #ff9800; 
             box-shadow: 0 0 10px #ff9800; 
         }
 
-        #submitBtn {
-            z-index: 9999;
-            position: relative;
-        }
+        .hohn-orange { color: #ff9800; }
+        .hohn-bg-orange { background-color: #ff9800 !important; }
     </style>
 </head>
-<body class="p-4 text-white">
+<body class="p-4">
 
-    <header class="text-center mb-6">
+    <header class="text-center mb-4">
         <h1 class="text-2xl font-bold">Josef Hohn GmbH</h1>
-        <p class="text-xs uppercase tracking-widest hohn-orange font-bold">Einzel-Anforderung</p>
+        <p class="text-xs uppercase tracking-widest hohn-orange font-bold">Material-Anforderung</p>
     </header>
 
-    <div class="swiper mySwiper h-72">
-        <div class="swiper-wrapper" id="swiperWrapper"></div>
-        <div class="swiper-pagination"></div>
+    <div class="scroll-container" id="container">
+        </div>
+
+    <div class="text-center text-gray-500 text-xs mt-2 italic">
+        ← Wischen zum Wechseln →
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 p-6 bg-[#262626] border-t border-gray-800 shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
+    <div class="fixed bottom-0 left-0 right-0 p-6 bg-[#262626] border-t border-gray-800">
         <form action="https://formspree.io/f/xpqryvel" method="POST" id="materialForm">
-            <input type="hidden" name="Ausgewaehlte_Maschine" id="selectedInput">
+            <input type="hidden" name="Maschine" id="selectedInput">
             <button type="submit" id="submitBtn" disabled 
-                class="w-full bg-gray-800 text-gray-600 font-black py-5 rounded-2xl text-xl uppercase transition-all duration-300 opacity-50 shadow-inner">
-                Anforderung Senden
+                class="w-full bg-gray-800 text-gray-600 font-bold py-5 rounded-2xl text-xl uppercase transition-all opacity-50">
+                Senden
             </button>
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         const machines = ["Grob 2", "Integrex", "Nexus", "Smart", "Roboterlinie Drehen", "Roboterlinie Bohren", "Ergo 260CL", "Axisco", "Karl Klink", "Padovani 3", "Magdeburg", "DMC 60 (H)", "Zentriermaschine", "Pronto 1", "Pronto 3", "Pronto 4", "Pronto 5"];
         
-        // Variable für genau EINE Auswahl
         let currentSelection = null;
+        const container = document.getElementById('container');
 
-        const wrapper = document.getElementById('swiperWrapper');
         machines.forEach(name => {
-            const slide = document.createElement('div');
-            slide.className = "swiper-slide flex justify-center items-center";
-            slide.innerHTML = `
-                <div class="machine-card" data-machine="${name}" onclick="selectOnlyOne('${name}', this)">
-                    <div class="status-dot"></div>
-                    <span class="status-text text-[10px] text-gray-500 uppercase font-bold mb-2 tracking-tighter">Bereit</span>
-                    <span class="text-3xl font-black uppercase text-center px-4 leading-tight">${name}</span>
-                </div>
+            const card = document.createElement('div');
+            card.className = "machine-card";
+            card.innerHTML = `
+                <div class="status-dot"></div>
+                <span class="status-text text-[10px] text-gray-500 uppercase font-bold mb-2">Bereit</span>
+                <span class="text-4xl font-black uppercase text-center px-4">${name}</span>
             `;
-            wrapper.appendChild(slide);
-        });
-
-        const swiper = new Swiper(".mySwiper", {
-            centeredSlides: true,
-            slidesPerView: 1,
-            spaceBetween: 20,
-            pagination: { el: ".swiper-pagination", clickable: true }
-        });
-
-        function selectOnlyOne(name, el) {
-            // 1. Alle anderen Karten zurücksetzen
-            document.querySelectorAll('.machine-card').forEach(card => {
-                card.classList.remove('active');
-                const label = card.querySelector('.status-text');
-                label.innerText = "Bereit";
-                label.style.color = "#6b7280";
-            });
-
-            // 2. Prüfen, ob man die gleiche Maschine nochmal anklickt (Abwählen)
-            if (currentSelection === name) {
-                currentSelection = null;
-            } else {
-                // 3. Neue Maschine aktivieren
-                currentSelection = name;
-                el.classList.add('active');
-                const label = el.querySelector('.status-text');
-                label.innerText = "Ausgewählt";
-                label.style.color = "#ff9800";
-            }
             
-            updateUI();
-        }
+            card.onclick = () => {
+                // Alle Karten zurücksetzen
+                document.querySelectorAll('.machine-card').forEach(c => {
+                    c.classList.remove('active');
+                    c.querySelector('.status-text').innerText = "Bereit";
+                    c.querySelector('.status-text').style.color = "#6b7280";
+                });
+
+                if (currentSelection === name) {
+                    currentSelection = null;
+                } else {
+                    currentSelection = name;
+                    card.classList.add('active');
+                    card.querySelector('.status-text').innerText = "Ausgewählt";
+                    card.querySelector('.status-text').style.color = "#ff9800";
+                }
+                updateUI();
+            };
+            container.appendChild(card);
+        });
+
+        // Platzhalter-Elemente am Anfang und Ende für besseres Zentrieren
+        const spacerStart = document.createElement('div');
+        spacerStart.style.flex = "0 0 7.5%";
+        container.prepend(spacerStart);
+        const spacerEnd = document.createElement('div');
+        spacerEnd.style.flex = "0 0 7.5%";
+        container.appendChild(spacerEnd);
 
         function updateUI() {
             const btn = document.getElementById('submitBtn');
@@ -137,15 +133,15 @@
             if (currentSelection) {
                 input.value = currentSelection;
                 btn.disabled = false;
-                btn.classList.add('hohn-bg-orange', 'text-white', 'opacity-100', 'scale-[1.02]');
+                btn.classList.add('hohn-bg-orange', 'text-white', 'opacity-100');
                 btn.classList.remove('bg-gray-800', 'text-gray-600', 'opacity-50');
-                btn.innerText = `JETZT SENDEN: ${currentSelection}`;
+                btn.innerText = `SENDEN: ${currentSelection}`;
             } else {
                 input.value = "";
                 btn.disabled = true;
-                btn.classList.remove('hohn-bg-orange', 'text-white', 'opacity-100', 'scale-[1.02]');
+                btn.classList.remove('hohn-bg-orange', 'text-white', 'opacity-100');
                 btn.classList.add('bg-gray-800', 'text-gray-600', 'opacity-50');
-                btn.innerText = "Anforderung Senden";
+                btn.innerText = "Senden";
             }
         }
     </script>
