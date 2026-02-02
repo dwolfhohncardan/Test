@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -17,32 +16,40 @@
         .hohn-orange { color: #ff9800; }
         .hohn-bg-orange { background-color: #ff9800 !important; }
         
-        /* Karten-Styling */
         .machine-card {
-            width: 80%;
-            height: 200px;
+            width: 85%;
+            height: 220px;
             background-color: #333;
-            border-radius: 15px;
+            border-radius: 20px;
             border: 4px solid transparent;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             margin: auto;
         }
+
+        /* Effekt für die einzige ausgewählte Maschine */
         .machine-card.active {
             border-color: #ff9800;
             background-color: #444;
+            transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(255, 152, 0, 0.2);
         }
+
         .status-dot {
             width: 12px; height: 12px; border-radius: 50%;
             background-color: #666; margin-bottom: 10px;
+            transition: all 0.3s;
         }
-        .active .status-dot { background-color: #ff9800; box-shadow: 0 0 8px #ff9800; }
 
-        /* Button Fix */
+        .active .status-dot { 
+            background-color: #ff9800; 
+            box-shadow: 0 0 10px #ff9800; 
+        }
+
         #submitBtn {
             z-index: 9999;
             position: relative;
@@ -51,22 +58,22 @@
 </head>
 <body class="p-4 text-white">
 
-    <header class="text-center mb-4">
+    <header class="text-center mb-6">
         <h1 class="text-2xl font-bold">Josef Hohn GmbH</h1>
-        <p class="text-xs uppercase tracking-widest hohn-orange">Material-Anforderung</p>
+        <p class="text-xs uppercase tracking-widest hohn-orange font-bold">Einzel-Anforderung</p>
     </header>
 
-    <div class="swiper mySwiper h-64">
+    <div class="swiper mySwiper h-72">
         <div class="swiper-wrapper" id="swiperWrapper"></div>
         <div class="swiper-pagination"></div>
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 p-6 bg-[#262626] border-t border-gray-800">
+    <div class="fixed bottom-0 left-0 right-0 p-6 bg-[#262626] border-t border-gray-800 shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
         <form action="https://formspree.io/f/xpqryvel" method="POST" id="materialForm">
-            <input type="hidden" name="Maschinenliste" id="selectedInput">
+            <input type="hidden" name="Ausgewaehlte_Maschine" id="selectedInput">
             <button type="submit" id="submitBtn" disabled 
-                class="w-full bg-gray-700 text-gray-500 font-bold py-5 rounded-xl text-xl uppercase transition-all opacity-50">
-                Senden (0)
+                class="w-full bg-gray-800 text-gray-600 font-black py-5 rounded-2xl text-xl uppercase transition-all duration-300 opacity-50 shadow-inner">
+                Anforderung Senden
             </button>
         </form>
     </div>
@@ -74,17 +81,19 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         const machines = ["Grob 2", "Integrex", "Nexus", "Smart", "Roboterlinie Drehen", "Roboterlinie Bohren", "Ergo 260CL", "Axisco", "Karl Klink", "Padovani 3", "Magdeburg", "DMC 60 (H)", "Zentriermaschine", "Pronto 1", "Pronto 3", "Pronto 4", "Pronto 5"];
-        let selected = new Set();
+        
+        // Variable für genau EINE Auswahl
+        let currentSelection = null;
 
         const wrapper = document.getElementById('swiperWrapper');
         machines.forEach(name => {
             const slide = document.createElement('div');
             slide.className = "swiper-slide flex justify-center items-center";
             slide.innerHTML = `
-                <div class="machine-card" onclick="toggle('${name}', this)">
+                <div class="machine-card" data-machine="${name}" onclick="selectOnlyOne('${name}', this)">
                     <div class="status-dot"></div>
-                    <span class="status-text text-[10px] text-gray-400 uppercase font-bold mb-2">Bereit</span>
-                    <span class="text-2xl font-black uppercase text-center px-2">${name}</span>
+                    <span class="status-text text-[10px] text-gray-500 uppercase font-bold mb-2 tracking-tighter">Bereit</span>
+                    <span class="text-3xl font-black uppercase text-center px-4 leading-tight">${name}</span>
                 </div>
             `;
             wrapper.appendChild(slide);
@@ -93,40 +102,50 @@
         const swiper = new Swiper(".mySwiper", {
             centeredSlides: true,
             slidesPerView: 1,
+            spaceBetween: 20,
             pagination: { el: ".swiper-pagination", clickable: true }
         });
 
-        function toggle(name, el) {
-            const label = el.querySelector('.status-text');
-            if (selected.has(name)) {
-                selected.delete(name);
-                el.classList.remove('active');
+        function selectOnlyOne(name, el) {
+            // 1. Alle anderen Karten zurücksetzen
+            document.querySelectorAll('.machine-card').forEach(card => {
+                card.classList.remove('active');
+                const label = card.querySelector('.status-text');
                 label.innerText = "Bereit";
-                label.style.color = "#9ca3af";
+                label.style.color = "#6b7280";
+            });
+
+            // 2. Prüfen, ob man die gleiche Maschine nochmal anklickt (Abwählen)
+            if (currentSelection === name) {
+                currentSelection = null;
             } else {
-                selected.add(name);
+                // 3. Neue Maschine aktivieren
+                currentSelection = name;
                 el.classList.add('active');
-                label.innerText = "Bedarf";
+                const label = el.querySelector('.status-text');
+                label.innerText = "Ausgewählt";
                 label.style.color = "#ff9800";
             }
-            update();
+            
+            updateUI();
         }
 
-        function update() {
+        function updateUI() {
             const btn = document.getElementById('submitBtn');
             const input = document.getElementById('selectedInput');
             
-            input.value = Array.from(selected).join(', ');
-            btn.innerText = `SENDEN (${selected.size})`;
-
-            if (selected.size > 0) {
+            if (currentSelection) {
+                input.value = currentSelection;
                 btn.disabled = false;
-                btn.classList.add('hohn-bg-orange', 'text-white', 'opacity-100');
-                btn.classList.remove('bg-gray-700', 'text-gray-500', 'opacity-50');
+                btn.classList.add('hohn-bg-orange', 'text-white', 'opacity-100', 'scale-[1.02]');
+                btn.classList.remove('bg-gray-800', 'text-gray-600', 'opacity-50');
+                btn.innerText = `JETZT SENDEN: ${currentSelection}`;
             } else {
+                input.value = "";
                 btn.disabled = true;
-                btn.classList.remove('hohn-bg-orange', 'text-white', 'opacity-100');
-                btn.classList.add('bg-gray-700', 'text-gray-500', 'opacity-50');
+                btn.classList.remove('hohn-bg-orange', 'text-white', 'opacity-100', 'scale-[1.02]');
+                btn.classList.add('bg-gray-800', 'text-gray-600', 'opacity-50');
+                btn.innerText = "Anforderung Senden";
             }
         }
     </script>
